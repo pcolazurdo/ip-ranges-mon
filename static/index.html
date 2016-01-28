@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<title>jsdifflib demo</title>
+	<link rel="stylesheet" type="text/css" href="diffview.css"/>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<script type="text/javascript" src="diffview.js"></script>
+	<script type="text/javascript" src="difflib.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<style type="text/css">
+
+</style>
+
+<script type="text/javascript">
+	$(window).load(function() {
+		$.ajax({
+			url : "metadata.json",
+			dataType: "json",
+			success : function (data) {
+				$("#lastUpdate").text("Last Update: " + data.lastUpdate);
+				$("#oldVersion").text(" " + data.oldVersion);
+				$("#newVersion").text(" " + data.newVersion);
+				$.ajax({
+					url : "data1.txt",
+					dataType: "text",
+					success : function (data) {
+						$("#baseText").text(data);
+					}
+					});
+				$.ajax({
+					url : "data2.txt",
+					dataType: "text",
+					success : function (data) {
+						$("#newText").text(data);
+						diffUsingJS(0);
+					}
+				});
+			}
+		});
+	});
+
+function diffUsingJS(viewType) {
+
+	"use strict";
+	var byId = function (id) { return document.getElementById(id); },
+		base = difflib.stringAsLines(byId("baseText").value),
+		newtxt = difflib.stringAsLines(byId("newText").value),
+		sm = new difflib.SequenceMatcher(base, newtxt),
+		opcodes = sm.get_opcodes(),
+		diffoutputdiv = byId("diffoutput"),
+		contextSize = byId("contextSize").value;
+
+	diffoutputdiv.innerHTML = "";
+	contextSize = contextSize || null;
+
+	diffoutputdiv.appendChild(diffview.buildView({
+		baseTextLines: base,
+		newTextLines: newtxt,
+		opcodes: opcodes,
+		baseTextName: $("#oldVersion").text(),
+		newTextName: $("#newVersion").text(),
+		contextSize: contextSize,
+		viewType: viewType
+	}));
+}
+
+</script>
+</head>
+<body>
+	<h1 class="top">Comparison of JSON files demo</h1>
+	<h1 id="lastUpdate">Last Update: </h1>
+	<div class="top">
+		<strong>Context size (optional):</strong> <input type="text" id="contextSize" value="" />
+	</div>
+	<div class="textInput">
+		<h2>Old Version <span id="oldVersion"></span></h2>
+		<textarea id="baseText"></textarea>
+	</div>
+	<div class="textInput spacer">
+		<h2>New Version <span id="newVersion"></span></h2>
+		<textarea id="newText"></textarea>
+	</div>
+	<div id="diffoutput"> </div>
+</body>
+</html>

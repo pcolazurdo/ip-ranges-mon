@@ -1,0 +1,218 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "AWS CloudFormation Template for IP monitoring: Builds DynamoDB tables, an S3 bucket, and Lambda function. ** This template creates multiple AWS resources. You will be billed for the AWS resources used if you create a stack from this template.",
+  "Parameters": {
+    "S3BucketName": {
+        "Description": "S3 bucket in which the static app will reside",
+        "Type": "String",
+        "MinLength": "3",
+        "MaxLength": "63",
+        "Default": "myipmonitoring"
+    },
+    "DynamoDBTableName": {
+        "Description": "DynamoDB Table in which to contain all versions of IP mappings",
+        "Type": "String",
+        "MinLength": "3",
+        "MaxLength": "63",
+        "Default": "myipmonitoring"
+    },
+    "LambdaFunctionName": {
+        "Description": "Lambda Function in which to contain source code",
+        "Type": "String",
+        "MinLength": "3",
+        "MaxLength": "63",
+        "Default": "myipmonitoring"
+    },
+    "Region": {
+        "Description": "Region where all the resources will be created",
+        "Type": "String",
+        "MinLength": "3",
+        "MaxLength": "63",
+        "Default": "eu-west-1"
+    }
+  },
+  "Resources": {
+    "DynamoDBTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "AttributeDefinitions": [
+              {
+                  "AttributeName": "SnsPublishTime",
+                  "AttributeType": "N"
+              },
+              {
+                  "AttributeName": "SnsTopicArn",
+                  "AttributeType": "S"
+              }
+          ],
+          "ProvisionedThroughput": {
+              "WriteCapacityUnits": 5,
+              "ReadCapacityUnits": 5
+          },
+          "KeySchema": [
+              {
+                  "KeyType": "HASH",
+                  "AttributeName": "SnsTopicArn"
+              },
+              {
+                  "KeyType": "RANGE",
+                  "AttributeName": "SnsPublishTime"
+              }
+          ],
+          "TableName": {
+            "Ref": "DynamoDBTableName"
+          }
+        }
+    },
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "PublicRead",
+        "BucketName": {
+          "Ref": "S3BucketName"
+        },
+        "WebsiteConfiguration": {
+          "IndexDocument": "index.html",
+          "ErrorDocument": "error.html"
+        }
+      }
+    },
+    "BucketPolicy" : {
+        "Type" : "AWS::S3::BucketPolicy",
+        "Properties" : {
+          "PolicyDocument" : {
+              "Id" : "S3BucketPolicy",
+              "Version": "2012-10-17",
+              "Statement": [
+                  {
+                    "Sid": "PublicReadForGetBucketObjects",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "*"
+                    },
+                    "Action": "s3:GetObject",
+                    "Resource" : { "Fn::Join" : [
+                        "", [ "arn:aws:s3:::", { "Ref" : "S3Bucket" } , "/*" ]
+                    ] }
+                  }
+              ]
+          },
+          "Bucket" : { "Ref" : "S3Bucket" }
+        }
+    },
+    "LambdaIpMonitoringFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Description": "Receives messages from SNS and update DynamoDB and S3 Website accordingly",
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [ "", [
+              "console.log(\"Empty Code - you need to deploy the corresponding code\");"
+          ] ]
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaIpMonitoringExecDynamoRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs",
+        "Timeout": "30"
+      }
+    },
+    "LambdaIpMonitoringExecDynamoRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "lambda_exec_ipmonitoring",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    "arn:aws:logs:*:*:*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WebsiteURL": {
+      "Description": "URL for static website hosted on S3",
+      "Value": {
+        "Fn::GetAtt": [
+          "S3Bucket",
+          "WebsiteURL"
+        ]
+      }
+    },
+    "S3BucketSecureURL": {
+      "Description": "Name of S3 bucket hosting content",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "S3Bucket",
+                "DomainName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "LambdaFunctionName": {
+      "Description": "Name of Lambda Function - You have to enable Associate the arn:aws:sns:us-east-1:806199016981:AmazonIpSpaceChanged SNS Topic as an event source.",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Fn::GetAtt": [
+                "LambdaIpMonitoringFunction",
+                "Arn"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+Old:
+
+{
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:eu-west-1:276631003671:jsonMessages:18f2399c-3b45-4535-aca6-cc513aa83a98",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "6dbb0e22-9a63-5e7f-94c4-40ccc70ac657",
+        "TopicArn": "arn:aws:sns:eu-west-1:276631003671:jsonMessages",
+        "Subject": null,
+        "Message": "{\n  \"syncToken\": \"1450462355\",\n  \"createDate\": \"2015-12-18-18-22-18\",\n  \"prefixes\": [\n    {\n      \"ip_prefix\": \"23.20.0.0/13\",\n      \"region\": \"us-east-1\",\n      \"service\": \"AMAZON\"\n    },\n    {\n      \"ip_prefix\": \"27.0.0.0/22\",\n      \"region\": \"ap-northeast-1\",\n      \"service\": \"AMAZON\"\n    }]\n}",
+        "Timestamp": "2015-12-18T19:14:49.001Z",
+        "SignatureVersion": "1",
+        "Signature": "GWq7Wu57JZHqKDOJMmScAYYpgI92VujqrGBuW0SuhP6hivO1Sd0tFW2Ppa2J9ypNDzRAdm04F2duvNU1diu4Ov6QYOvdA2jQ0zfPcX6cVrR9dIJLFkajqE/U//wOoALHeYQi6np+V/yXMAQZNvXiYAfuUl2cwsS3id5P3g2RnK7A3XcYHuzDa6hjC+wBBHKUXtV4Jbkzsa+4FR93c5zqQwxxZ12YhXApQNE4PCwzkJy/7dbjThELuT4FcF+odYPZuPc0mMhTPd1BwCiZm8gxHHv3tLny0ohqlzQyf10TFGuLhCCn9+3gELCbMBzDZB5dlU/qn8OaTGnXMLI35BHBbQ==",
+        "SigningCertUrl": "https://sns.eu-west-1.amazonaws.com/SimpleNotificationService-bb750dd426d95ee9390147a5624348ee.pem",
+        "UnsubscribeUrl": "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:276631003671:jsonMessages:18f2399c-3b45-4535-aca6-cc513aa83a98",
+        "MessageAttributes": {
+          "AWS.SNS.MOBILE.MPNS.Type": {
+            "Type": "String",
+            "Value": "token"
+          },
+          "AWS.SNS.MOBILE.MPNS.NotificationClass": {
+            "Type": "String",
+            "Value": "realtime"
+          },
+          "AWS.SNS.MOBILE.WNS.Type": {
+            "Type": "String",
+            "Value": "wns/badge"
+          }
+        }
+      }
+    }
+  ]
+}
+
+
+New:
