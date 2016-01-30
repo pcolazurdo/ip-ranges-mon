@@ -178,7 +178,7 @@ exports.handler = function(event, context) {
           publishToSNS(
             {
               subject: "There is a new version of AWS Public IP dataset",
-              message: "Old Version: " + metadata.oldVersion + " - New Version: " + metadata.newVersion
+              message: "Old Version: " + metadata.oldVersion + " - New Version: " + metadata.newVersion + "\n Please check the differences on " + config.publicUrl
             }, function() {
               context.done(null,'');
             }

@@ -23,6 +23,13 @@
         "MaxLength": "63",
         "Default": "myipmonitoring"
     },
+    "SNSTopicAlertName": {
+        "Description": "SNS Topic where Alerts about change detection will be send. Please Remember to configure this as per your preferences",
+        "Type": "String",
+        "MinLength": "3",
+        "MaxLength": "63",
+        "Default": "myipmonitoring-alert"
+    },
     "Region": {
         "Description": "Region where all the resources will be created",
         "Type": "String",
@@ -74,6 +81,17 @@
         "WebsiteConfiguration": {
           "IndexDocument": "index.html",
           "ErrorDocument": "error.html"
+        }
+      }
+    },
+    "SNSTopicAlert": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": {
+          "Ref": "SNSTopicAlertName"
+        },
+        "TopicName": {
+          "Ref": "SNSTopicAlertName"
         }
       }
     },
@@ -163,6 +181,24 @@
                     "dynamodb:UpdateItem"
                   ],
                   "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:PutObjectAcl"
+                  ],
+                  "Resource" : { "Fn::Join" : [
+                      "", [ "arn:aws:s3:::", { "Ref" : "S3Bucket" } , "/*" ]
+                  ] }
+                },
+                {
+                  "Sid": "Stmt1451572728000",
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish"
+                  ],
+                  "Resource" : { "Ref": "SNSTopicAlert" }
                 }
               ]
             }
